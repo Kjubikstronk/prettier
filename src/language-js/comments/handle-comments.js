@@ -1212,6 +1212,19 @@ function getEnclosingAssignmentChainExpressionStatement(node, ancestors) {
       continue;
     }
 
+    if (ancestor.type === "VariableDeclarator" && ancestor.init === child) {
+      child = ancestor;
+      continue;
+    }
+
+    if (
+      ancestor.type === "VariableDeclaration" &&
+      ancestor.declarations.length === 1 &&
+      ancestor.declarations[0] === child
+    ) {
+      return ancestor;
+    }
+
     return ancestor.type === "ExpressionStatement" &&
       ancestor.expression === child
       ? ancestor
@@ -1263,9 +1276,12 @@ function handleParenthesizedExpressionTrailingComment({
       (isAssignment &&
         enclosingNode.type === "AssignmentExpression" &&
         enclosingNode.right === precedingNode) ||
-      (precedingNode.type === "ArrowFunctionExpression" &&
-        enclosingNode.type === "ArrowFunctionExpression" &&
-        enclosingNode.body === precedingNode)
+      // A sequence or assignment body keeps its parentheses, so a comment
+      // inside them stays put. Every other arrow body loses them.
+      (enclosingNode.type === "ArrowFunctionExpression" &&
+        enclosingNode.body === precedingNode &&
+        precedingNode.type !== "SequenceExpression" &&
+        precedingNode.type !== "AssignmentExpression")
     ) {
       const expressionStatement =
         getEnclosingAssignmentChainExpressionStatement(

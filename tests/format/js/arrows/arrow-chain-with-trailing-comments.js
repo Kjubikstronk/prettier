@@ -7,3 +7,8 @@ x2 = (a) => ((askTrovenaBeenaDependsRowans1, askTrovenaBeenaDependsRowans2, askT
   c();
 } /* ! */ // KABOOM
 )
+
+var x3 = (a) => ((b) => {
+  c();
+} /* ! */ // KABOOM
+)
